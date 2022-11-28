@@ -1,0 +1,64 @@
+<form name="form" method="post" action="/">
+  <div>
+    <label for="form_name" class="required">Name</label>
+    <input type="text" id="form_name" name="form[name]" required="required" />
+  </div>
+  <div>
+    <label for="form_gender" class="required">Gender</label>
+    <select id="form_gender" name="form[gender]">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+  <div>
+    <label for="form_email" class="required">Email</label>
+    <input type="email" id="form_email" name="form[email]" required="required" />
+  </div>
+  <div>
+    <label for="form_tel" class="required">Tel</label>
+    <input type="tel" id="form_tel" name="form[tel]" required="required" />
+  </div>
+  <div>
+    <label for="form_body" class="required">Body</label>
+    <input type="text" id="form_body" name="form[body]" required="required" />
+  </div>
+  <div>
+    <label for="form_agreement" class="required">Agreement</label>
+    <input type="checkbox" id="form_agreement" name="form[agreement]" required="required" value="1" />
+  </div>
+  <div>
+    <button type="submit" id="form_submit" disabled>
+      Submit
+    </button>
+  </div>
+  <input type="hidden" id="form_recaptchaV3" name="form[recaptchaV3]" />
+  <input type="hidden" id="form__token" name="form[_token]" />
+</form>
+
+<script src="https://www.google.com/recaptcha/api.js?render={{
+    google_recaptcha_site_key
+  }}"></script>
+<script>
+  {
+    const recaptchaPromise = new Promise((resolve, reject) => {
+      grecaptcha.ready(async () => {
+        const token = await grecaptcha.execute("{{google_recaptcha_site_key}}", {
+          action: "homepage",
+        });
+        document.querySelector("#form_recaptchaV3").value = token;
+        resolve(true);
+      });
+    });
+
+    const csrfPromise = new Promise(async (resolve, reject) => {
+      const csrf = await (await fetch('/')).json();
+      document.querySelector("#form__token").value = csrf.token;
+      resolve(true);
+    });
+
+    Promise.all([recaptchaPromise, csrfPromise]).then(() => {
+      document.querySelector("#form_submit").disabled = false;
+    });
+  }
+</script>
